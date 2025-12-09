@@ -12,7 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useIngredientsStore } from '@/stores/ingredients-store';
 import { useRecipesStore } from '@/stores/recipes-store';
-import { generateRecipes } from '@/lib/openai';
+import { generateRecipes } from '@/lib/ai';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import type { RecipeType, CuisineStyle, Recipe } from '@/types';
 

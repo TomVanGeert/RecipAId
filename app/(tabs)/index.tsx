@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import {
   View,
   Text,
@@ -6,22 +6,50 @@ import {
   ScrollView,
   Alert,
   ActivityIndicator,
+  TextInput,
+  Modal,
+  Platform,
 } from 'react-native';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
-import * as FileSystem from 'expo-file-system';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useIngredientsStore } from '@/stores/ingredients-store';
-import { detectIngredients } from '@/lib/openai';
+import { detectIngredients } from '@/lib/ai';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import type { Ingredient } from '@/types';
+
+// Helper to convert image URI to base64
+const uriToBase64 = async (uri: string): Promise<string> => {
+  if (Platform.OS === 'web') {
+    // For web, fetch the blob and convert to base64
+    const response = await fetch(uri);
+    const blob = await response.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64 = (reader.result as string).split(',')[1];
+        resolve(base64);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  } else {
+    // For native, use expo-file-system
+    const FileSystem = require('expo-file-system');
+    return await FileSystem.readAsStringAsync(uri, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+  }
+};
 
 export default function ScanScreen() {
   const router = useRouter();
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [manualIngredient, setManualIngredient] = useState('');
   
   const { 
     scannedIngredients, 
@@ -71,9 +99,7 @@ export default function ScanScreen() {
     setIsAnalyzing(true);
     try {
       // Convert image to base64
-      const base64 = await FileSystem.readAsStringAsync(uri, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
+      const base64 = await uriToBase64(uri);
 
       const result = await detectIngredients(base64);
       
@@ -105,6 +131,14 @@ export default function ScanScreen() {
   const handleClear = () => {
     setImageUri(null);
     clearIngredients();
+  };
+
+  const handleAddIngredient = () => {
+    if (manualIngredient.trim()) {
+      addManualIngredient(manualIngredient.trim());
+      setManualIngredient('');
+      setShowAddModal(false);
+    }
   };
 
   return (
@@ -212,20 +246,10 @@ export default function ScanScreen() {
           </View>
         )}
 
-        {/* Add Manual Ingredient */}
+        {/* Add Manual Ingredient Button */}
         {(imageUri || scannedIngredients.length > 0) && (
           <TouchableOpacity 
-            onPress={() => {
-              Alert.prompt(
-                'Add Ingredient',
-                'Enter ingredient name',
-                (text) => {
-                  if (text?.trim()) {
-                    addManualIngredient(text.trim());
-                  }
-                }
-              );
-            }}
+            onPress={() => setShowAddModal(true)}
             className="flex-row items-center justify-center gap-2 py-4 mb-6 border border-dashed border-stone-600 rounded-xl"
           >
             <IconSymbol name="plus" size={20} color="#78716c" />
@@ -262,6 +286,48 @@ export default function ScanScreen() {
           </View>
         )}
       </ScrollView>
+
+      {/* Add Ingredient Modal */}
+      <Modal
+        visible={showAddModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowAddModal(false)}
+      >
+        <View className="flex-1 bg-black/70 justify-center items-center px-6">
+          <View className="bg-stone-800 rounded-2xl p-6 w-full max-w-sm">
+            <Text className="text-xl font-bold text-white mb-4">
+              Add Ingredient
+            </Text>
+            <TextInput
+              className="bg-stone-700 border border-stone-600 rounded-xl px-4 py-3 text-white mb-4"
+              placeholder="Enter ingredient name"
+              placeholderTextColor="#78716c"
+              value={manualIngredient}
+              onChangeText={setManualIngredient}
+              autoFocus
+              onSubmitEditing={handleAddIngredient}
+            />
+            <View className="flex-row gap-3">
+              <TouchableOpacity
+                onPress={() => {
+                  setManualIngredient('');
+                  setShowAddModal(false);
+                }}
+                className="flex-1 py-3 rounded-xl bg-stone-700"
+              >
+                <Text className="text-stone-300 text-center font-medium">Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handleAddIngredient}
+                className="flex-1 py-3 rounded-xl bg-primary-500"
+              >
+                <Text className="text-white text-center font-medium">Add</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
