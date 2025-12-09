@@ -1,50 +1,124 @@
-# Welcome to your Expo app 👋
+# RecipAId 🍳
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+> Your AI-Powered Kitchen Assistant
 
-## Get started
+RecipAId is a mobile app that uses AI vision to scan ingredients from your fridge or pantry and generates personalized recipes based on what you have available.
 
-1. Install dependencies
+## Features
 
+- **📸 Ingredient Scanner**: Take a photo of your ingredients and let AI identify them
+- **🍽️ Smart Recipe Generation**: Get personalized recipe suggestions based on your available ingredients
+- **🌍 Cuisine Styles**: Choose from Mexican, Italian, Indian, Chinese, Japanese, French, American, Thai, Mediterranean, or any style
+- **🛒 Shopping Lists**: Automatically generate shopping lists for recipes that need extra ingredients
+- **📚 Recipe Library**: Save and organize your favorite recipes
+- **✏️ Recipe Editing**: Customize saved recipes to your liking
+
+## Tech Stack
+
+- **Framework**: [Expo](https://expo.dev) SDK 54 (React Native)
+- **Navigation**: [Expo Router](https://docs.expo.dev/router/introduction/)
+- **Styling**: [NativeWind](https://www.nativewind.dev/) (TailwindCSS for React Native)
+- **State Management**: [Zustand](https://zustand-demo.pmnd.rs/)
+- **Server State**: [TanStack Query](https://tanstack.com/query)
+- **Backend**: [Supabase](https://supabase.com) (Auth, Database, Storage)
+- **AI**: [OpenAI GPT-4o](https://openai.com) (Vision + Chat)
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18+
+- npm or yarn
+- Expo CLI
+- iOS Simulator / Android Emulator / Expo Go app
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/TomVanGeert/RecipAId.git
+   cd RecipAId/recipaid
+   ```
+
+2. Install dependencies:
    ```bash
    npm install
    ```
 
-2. Start the app
+3. Set up environment variables:
+   ```bash
+   cp .env.example .env
+   ```
+   
+   Then edit `.env` and add your API keys:
+   ```
+   EXPO_PUBLIC_SUPABASE_URL=your_supabase_url
+   EXPO_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   EXPO_PUBLIC_OPENAI_API_KEY=your_openai_api_key
+   ```
 
+4. Start the development server:
    ```bash
    npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+5. Open the app:
+   - Press `i` for iOS simulator
+   - Press `a` for Android emulator
+   - Scan QR code with Expo Go app on your device
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Project Structure
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```
+recipaid/
+├── app/                    # Expo Router screens
+│   ├── (auth)/            # Authentication screens
+│   ├── (tabs)/            # Main tab navigation
+│   │   ├── index.tsx      # Scan screen
+│   │   ├── recipes.tsx    # Recipe generation
+│   │   ├── saved.tsx      # Saved recipes & lists
+│   │   └── profile.tsx    # User profile
+│   └── recipe/[id].tsx    # Recipe detail
+├── components/            # Reusable UI components
+├── constants/             # App constants & theme
+├── hooks/                 # Custom React hooks
+├── lib/                   # Core utilities
+│   ├── supabase.ts       # Supabase client
+│   └── openai.ts         # OpenAI client
+├── stores/               # Zustand stores
+│   ├── auth-store.ts     # Authentication state
+│   ├── ingredients-store.ts # Ingredients state
+│   └── recipes-store.ts  # Recipes state
+└── types/                # TypeScript definitions
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Environment Variables
 
-## Learn more
+| Variable | Description |
+|----------|-------------|
+| `EXPO_PUBLIC_SUPABASE_URL` | Your Supabase project URL |
+| `EXPO_PUBLIC_SUPABASE_ANON_KEY` | Your Supabase anonymous key |
+| `EXPO_PUBLIC_OPENAI_API_KEY` | Your OpenAI API key |
 
-To learn more about developing your project with Expo, look at the following resources:
+## Database Schema
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+The app uses Supabase with the following tables:
 
-## Join the community
+- **profiles**: User profile information
+- **ingredients**: Scanned ingredients history
+- **recipes**: Saved recipes
+- **shopping_lists**: Generated shopping lists
 
-Join our community of developers creating universal apps.
+All tables have Row Level Security (RLS) enabled for user data protection.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the MIT License.
+
+---
+
+Built with ❤️ using Expo, Supabase, and OpenAI
